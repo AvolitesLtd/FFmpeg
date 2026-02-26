@@ -1,3 +1,11 @@
+Native Windows compilation using MSYS2
+
+1. Install MSYS2 http://msys2.github.io/.
+2. Launch MinGW-w64 and navigate the folder where "Configure" is located.
+3. Run "./0_install_deps.sh": install all the necessary dependencies.
+4. Run "./1_build.sh": make and install the dlls.
+5. -> DLLs can be found at \build\install.
+
 # FFmpeg README
 
 FFmpeg is a collection of libraries and tools to process multimedia content
