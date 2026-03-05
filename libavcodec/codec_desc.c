@@ -1992,6 +1992,13 @@ static const AVCodecDescriptor codec_descriptors[] = {
         .props     = AV_CODEC_PROP_LOSSY | AV_CODEC_PROP_LOSSLESS,
         .mime_types= MT("image/webp"),
     },
+    {
+        .id        = AV_CODEC_ID_AVO_CODEC,
+        .type      = AVMEDIA_TYPE_VIDEO,
+        .name      = "avo_codec",
+        .long_name = NULL_IF_CONFIG_SMALL("Avolites Codec"),
+        .props     = AV_CODEC_PROP_INTRA_ONLY | AV_CODEC_PROP_LOSSY,
+    },
 
     /* various PCM "codecs" */
     {

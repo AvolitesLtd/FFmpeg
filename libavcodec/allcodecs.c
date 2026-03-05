@@ -927,6 +927,9 @@ extern const FFCodec ff_vnull_encoder;
 extern const FFCodec ff_anull_decoder;
 extern const FFCodec ff_anull_encoder;
 
+extern const FFCodec ff_avo_codec_encoder;
+extern const FFCodec ff_avo_codec_decoder;
+
 // The iterate API is not usable with ossfuzz due to the excessive size of binaries created
 #if CONFIG_OSSFUZZ
 const FFCodec * codec_list[] = {
