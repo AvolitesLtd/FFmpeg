@@ -56,7 +56,9 @@ mkdir -p build/install
   --enable-d3d11va \
   --enable-nvenc \
   --enable-nvdec \
-  --enable-dxva2
+  --enable-dxva2 \
+  --disable-optimizations \
+  --enable-debug
 
 make clean
 make -j$(nproc)
