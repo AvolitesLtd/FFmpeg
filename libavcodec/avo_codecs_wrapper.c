@@ -67,7 +67,6 @@ static int avo_codec_decode(AVCodecContext* avctx, AVFrame* frame, int* got_fram
     if (g_avo_decode)
         ret = g_avo_decode(avctx, frame, got_frame, avpkt);
 
-    *got_frame = (ret > 0);
     return ret < 0 ? ret : 0;
 }
 
@@ -85,7 +84,6 @@ static int avo_codec_encode(AVCodecContext* avctx, AVPacket* pkt, const AVFrame*
 
     ret = g_avo_encode(avctx, pkt, frame, got_packet);
 
-    *got_packet = (ret > 0);
     return ret < 0 ? ret : 0;
 }
 
@@ -109,7 +107,7 @@ const FFCodec ff_avo_codec_encoder = {
 	FF_CODEC_ENCODE_CB(avo_codec_encode),
 	.close = avo_codec_close,
 	.p.wrapper_name = "avo_codecs_dll",
-    CODEC_PIXFMTS(AV_PIX_FMT_RGBA),
+    CODEC_PIXFMTS(AV_PIX_FMT_ARGB),
     .caps_internal = FF_CODEC_CAP_INIT_CLEANUP,
 };
 
