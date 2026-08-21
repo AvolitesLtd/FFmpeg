@@ -13,30 +13,52 @@ mkdir -p build/install
   --enable-shared \
   --disable-static \
   --enable-gpl \
+  --enable-version3 \
   --enable-w32threads \
   --disable-doc \
-  --disable-everything \
-  --enable-decoder=h264 \
-  --enable-decoder=h264_cuvid \
-  --enable-hwaccel=h264_d3d11va \
-  --enable-hwaccel=h264_d3d11va2 \
-  --enable-hwaccel=h264_dxva2 \
-  --enable-hwaccel=h264_nvdec \
-  --enable-demuxer=rtsp \
-  --enable-demuxer=sdp \
-  --enable-demuxer=rtp \
-  --enable-parser=h264 \
-  --enable-bsf=h264_mp4toannexb \
-  --enable-protocol=rtsp \
-  --enable-protocol=rtp \
-  --enable-protocol=tcp \
-  --enable-protocol=udp \
-  --enable-protocol=udplite \
+  --enable-sdl2 \
+  --enable-fontconfig \
+  --enable-gnutls \
+  --enable-iconv \
+  --enable-libass \
+  --enable-libbluray \
+  --enable-libfreetype \
+  --enable-libmp3lame \
+  --enable-libopencore-amrnb \
+  --enable-libopencore-amrwb \
+  --enable-libopenjpeg \
+  --enable-libopus \
+  --enable-libshine \
+  --enable-libsnappy \
+  --enable-libsoxr \
+  --enable-libtheora \
+  --enable-libtwolame \
+  --enable-libvpx \
+  --enable-libwebp \
+  --enable-libx264 \
+  --enable-libx265 \
+  --enable-libxml2 \
+  --enable-libzimg \
+  --enable-lzma \
+  --enable-zlib \
+  --enable-gmp \
+  --enable-libvidstab \
+  --enable-libvorbis \
+  --enable-libvo-amrwbenc \
+  --enable-libmysofa \
+  --enable-libspeex \
+  --enable-libxvid \
+  --enable-libaom \
+  --enable-libvpl \
+  --enable-amf \
+  --enable-ffnvcodec \
   --enable-cuvid \
   --enable-d3d11va \
+  --enable-nvenc \
+  --enable-nvdec \
   --enable-dxva2 \
-  --enable-ffnvcodec \
-  --enable-nvdec
+  --disable-optimizations \
+  --enable-debug
 
 make clean
 make -j$(nproc)

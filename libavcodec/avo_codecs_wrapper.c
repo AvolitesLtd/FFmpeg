@@ -34,7 +34,7 @@ static void load_avo_codec(void)
         g_avo_get_frame_size = (avo_get_frame_size_func)GetProcAddress(g_avo_codec_dll, "avo_codec_get_frame_size");
     }
 
-    if (!g_avo_init || !g_avo_encode || !g_avo_decode || !g_avo_close)
+    if (!g_avo_init || !g_avo_encode || !g_avo_decode || !g_avo_close || !g_avo_get_frame_size)
         FreeLibrary(g_avo_codec_dll);
 }
 
