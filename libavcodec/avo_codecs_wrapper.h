@@ -3,7 +3,11 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#pragma pack(push, 1) 
+/*
+ * Internal ABI between libavcodec and AVO_codecs.dll.
+ * This header is not part of the public FFmpeg API.
+ */
+#pragma pack(push, 1)
 typedef struct AVO_CodecContext
 {
     uint32_t codec;
@@ -12,8 +16,18 @@ typedef struct AVO_CodecContext
     uint32_t height;
     size_t buffer_size;
     uint8_t *buffer;
-    int use_cpu;        // 0 or 1
-    int preserve_alpha; // 0 or 1
-    int is_encoder;     // 0 or 1
+    int use_cpu;
+    int preserve_alpha;
+    int is_encoder;
+    void *reserved;
 } AVO_CodecContext;
-#pragma pack(pop) 
+
+typedef struct AVO_CodecBuffer
+{
+    uint8_t *data;
+    int size;
+    int linesize;
+    int width;
+    int height;
+} AVO_CodecBuffer;
+#pragma pack(pop)

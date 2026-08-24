@@ -15,12 +15,12 @@ Building FFmpeg with clang-cl on Windows requires MSYS2 + Visual Studio.
 
 ```
 Visual Studio Installer
-→ Modify
-→ Individual Components
-→ search "Clang"
-→ ✅ "C++ Clang Compiler for Windows"
-→ ✅ "MSBuild support for LLVM"
-→ Modify (install)
+- Modify
+- Individual Components
+- search "Clang"
+- "C++ Clang Compiler for Windows"
+- "MSBuild support for LLVM"
+- Modify (install)
 ```
 
 Installed to:
@@ -61,6 +61,25 @@ Then from that prompt launch MSYS2:
 set MSYS2_PATH_TYPE=inherit
 C:\msys64\msys2_shell.cmd -mingw64 -use-full-path
 ```
+
+### Automated MSVC build
+
+From any Command Prompt or Explorer, in this repo:
+
+```cmd
+build_msvc.bat
+```
+
+That runs vcvars64 (x64 MSVC), inherits that environment into MSYS2, puts LLVM `clang-cl` on PATH, then `./1_build_msvc.sh`.
+
+If you are already in an MSYS2 shell started from the x64 Native Tools prompt:
+
+```bash
+export PATH="/c/Program Files/LLVM/bin:$PATH"
+./1_build_msvc.sh
+```
+
+DLLs land in `build/install/bin/`.
 
 ### Verify the tools are visible inside MSYS2
 

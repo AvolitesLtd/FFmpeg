@@ -1,11 +1,43 @@
 #!/bin/bash
+set -euo pipefail
+
+# Steps 3–4: clang-cl on PATH, then configure/build/install MSVC shared DLLs.
+# Prefer build_msvc.bat from cmd so vcvars64 + MSYS2 inherit are set (steps 1–2).
+
+if ! command -v clang-cl >/dev/null 2>&1; then
+  export PATH="/c/Program Files/LLVM/bin:$PATH"
+fi
+
+if ! command -v cl >/dev/null 2>&1; then
+  echo "cl.exe not found. Run build_msvc.bat, or start MSYS2 from an x64 Native Tools prompt."
+  exit 1
+fi
+if ! command -v clang-cl >/dev/null 2>&1; then
+  echo "clang-cl not found. Add C:/Program Files/LLVM/bin to PATH."
+  exit 1
+fi
+if ! command -v nasm >/dev/null 2>&1; then
+  echo "nasm not found. In MSYS2: pacman -S nasm"
+  exit 1
+fi
 
 PREFIX="$(pwd)/build/install"
 FFMPEG_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
 BUILD_NAME="ffmpeg-${FFMPEG_VERSION}-win64-shared"
+JOBS=$(nproc 2>/dev/null || echo 8)
 
-mkdir -p build/install
+echo "==> tools"
+echo "    pwd:      $(pwd)"
+echo "    cl:       $(command -v cl)"
+echo "    clang-cl: $(command -v clang-cl)"
+echo "    nasm:     $(command -v nasm)"
+echo "    make:     $(command -v make)"
+echo "    jobs:     $JOBS"
+echo "    prefix:   $PREFIX"
 
+mkdir -p "$PREFIX"
+
+echo "==> configure (can take several minutes before the first line)"
 ./configure \
   --toolchain=msvc \
   --arch=x86_64 \
@@ -17,21 +49,17 @@ mkdir -p build/install
   --disable-stripping \
   --enable-shared \
   --disable-static \
-  --prefix=./build
+  --prefix="$PREFIX"
 
+echo "==> make clean"
 make clean
-make -j$(nproc)
+echo "==> make -j$JOBS (this is the long step; compiler lines should scroll)"
+make -j"$JOBS"
+echo "==> make install"
 make install
 
-echo "Copying runtime DLLs..."
-for dll in "$PREFIX/bin/"*.dll; do
-  ldd "$dll" | grep '/mingw64/bin' | awk '{print $3}' | while read dep; do
-    cp -n "$dep" "$PREFIX/bin/"
-  done
-done
-
-# Copy PDBs to install bin dir
-find . -name "*.pdb" -exec cp {} ./build/bin/ \;
+mkdir -p "$PREFIX/bin"
+find . -name "*.pdb" -exec cp {} "$PREFIX/bin/" \;
 
 # generate readme
 cat > "$PREFIX/readme.txt" << EOF
