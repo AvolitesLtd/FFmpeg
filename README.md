@@ -72,6 +72,8 @@ build_msvc.bat
 
 That runs vcvars64 (x64 MSVC), inherits that environment into MSYS2, puts LLVM `clang-cl` on PATH, then `./1_build_msvc.sh`.
 
+`1_build_msvc.sh` first builds a static MSVC `zlib.lib` (`0_build_zlib_msvc.sh`) and passes `--enable-zlib`. zlib is added through the MSVC `INCLUDE`/`LIB` environment variables, not `--extra-cflags`, because this tree lives under `Source Code` and a space in `-I`/`-L` splits the compiler command. Without zlib, FFmpeg disables the **png** decoder (and apng, exr, and other inflate-based codecs), so PNG image sequences fail while JPEG sequences still work.
+
 If you are already in an MSYS2 shell started from the x64 Native Tools prompt:
 
 ```bash
@@ -129,6 +131,9 @@ Run configure:
 | `--disable-optimizations` | Disables `/O2`, keeps stack frames intact for debugging |
 | `--disable-stripping` | Don't strip symbols from output |
 | `--enable-shared` | Build `.dll` + `.lib` + `.pdb` |
+| `--enable-zlib` | Required for **png** (and apng/exr). Use `1_build_msvc.sh` so zlib is built first. |
+
+Prefer `build_msvc.bat` over copying this block: the bat file builds zlib and fails configure if PNG is still off.
 
 ### Confirm configure detected x64
 
@@ -244,6 +249,47 @@ Pass the full path explicitly to configure:
   --cxx="C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/bin/clang-cl.exe" \
   ...
 ```
+
+## PNG image sequences and matching a gyan.dev full build
+
+FFmpeg does not have a separate "image sequence codec". `image2` is a **demuxer** (always enabled). Each frame is decoded by the still-image decoder for that extension:
+
+| Extension | Decoder | Extra dependency |
+|---|---|---|
+| `.jpg` / `.jpeg` | `mjpeg` | none (native) |
+| `.png` | `png` | **zlib** |
+| `.tif` / `.tiff` | `tiff` | zlib optional (compressed TIFF) |
+| `.exr` | `exr` | **zlib** |
+| `.bmp` `.tga` `.dpx` | native | none |
+
+`--enable-decoder=png` is not enough. `png_decoder_select="inflate_wrapper"` and `inflate_wrapper_deps="zlib"`. If configure cannot find `zlib.h` + `zlib.lib`, `CONFIG_PNG_DECODER` stays 0 and Prism's `avcodec_find_decoder(AV_CODEC_ID_PNG)` fails.
+
+MSVC has no system zlib (MinGW `pacman` zlib is the wrong ABI). The MSVC path builds zlib with clang-cl and links it statically into the FFmpeg DLLs — no `zlib1.dll` to ship.
+
+After a rebuild, confirm:
+
+```cmd
+ffmpeg.exe -hide_banner -decoders | findstr png
+ffmpeg.exe -i D:\path\frame_%04d.png -f null -
+```
+
+You should see `VFS..D png` (and `apng`). Then copy the install into Prism:
+
+```cmd
+Dependencies\FFmpeg\sync_to_prism.bat "D:\Source Code\AvolitesLtd\FFmpeg\build\install"
+```
+
+### Same decoder list as a gyan.dev `full_build` README
+
+A default FFmpeg configure already enables **all native** decoders whose dependencies are present. You do **not** copy gyan's decoder list into `--enable-decoder=...`.
+
+What that README is listing:
+
+1. **Native codecs** (h264, hevc, mjpeg, png, bmp, tiff, …) — enabled here once zlib is found. This is what PNG sequences need.
+2. **External-lib codecs** (`libdav1d`, `libjxl`, `libaom_av1`, `libvpx_*`, `libopus`, …) — each needs that library **built for MSVC** (`--enable-libdav1d`, `--enable-libjxl`, …). Gyan's MinGW full build ships dozens of those; this MSVC tree does not.
+3. **Native fallbacks** still exist without those libs: FFmpeg's own `av1`, `vp8`, `vp9`, `opus`, `webp`, `jpeg2000` decoders.
+
+Matching gyan's *entire* external-library decoder list is a separate MSVC port of those libraries, not a configure switch. For Prism image sequences, zlib + native png is the required piece.
 
 Native Windows compilation using MSYS2
 =============
