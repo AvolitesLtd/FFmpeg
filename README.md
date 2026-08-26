@@ -133,6 +133,8 @@ Run configure:
 | `--enable-shared` | Build `.dll` + `.lib` + `.pdb` |
 | `--enable-zlib` | Required for **png** (and apng/exr). Use `1_build_msvc.sh` so zlib is built first. |
 
+The MSVC script does **not** pass `--enable-gpl` or `--enable-libx264`. The DLLs stay **LGPL v2.1+**. Software H.264 encode uses `h264_mf`; GPU encode uses NVENC / AMF / QSV.
+
 Prefer `build_msvc.bat` over copying this block: the bat file builds zlib and fails configure if PNG is still off.
 
 ### Confirm configure detected x64

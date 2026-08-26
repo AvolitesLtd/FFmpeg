@@ -26,18 +26,14 @@ pacman -S --needed --noconfirm \
   mingw-w64-x86_64-twolame \
   mingw-w64-x86_64-libvpx \
   mingw-w64-x86_64-libwebp \
-  mingw-w64-x86_64-x264 \
-  mingw-w64-x86_64-x265 \
   mingw-w64-x86_64-libxml2 \
   mingw-w64-x86_64-zimg \
   mingw-w64-x86_64-xz \
   mingw-w64-x86_64-zlib \
   mingw-w64-x86_64-gmp \
-  mingw-w64-x86_64-vid.stab \
   mingw-w64-x86_64-libvorbis \
   mingw-w64-x86_64-libmysofa \
   mingw-w64-x86_64-speex \
-  mingw-w64-x86_64-xvidcore \
   mingw-w64-x86_64-aom \
   mingw-w64-x86_64-libvpl \
   mingw-w64-x86_64-onevpl \
