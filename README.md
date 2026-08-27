@@ -83,6 +83,34 @@ export PATH="/c/Program Files/LLVM/bin:$PATH"
 
 DLLs land in `build/install/bin/`.
 
+### Automated MSVC RTSP / H.264-min build
+
+`SynergyPreviewsReceiver` only needs H.264 decode over RTSP (software + D3D11VA), plus the filter graph (`buffer` / `buffersink` / `format` / `scale` / `hwdownload`). It does not need PNG, HEVC, or any encoder.
+
+```cmd
+build_msvc_rtsp_min.bat
+```
+
+That is the same vcvars64 + MSYS2 + clang-cl setup as `build_msvc.bat`, then `./1_build_msvc_rtsp_min.sh`.
+
+FFmpeg cannot configure out of tree when the source path contains a space (`Source Code`), so this is an **in-tree** configure like `1_build_msvc.sh`. It still installs to `build/install-rtsp-min/` and does not overwrite the full Prism DLLs in `build/install/`. Re-run `build_msvc.bat` afterwards if you need the full profile’s in-tree `config.h` back. No zlib, AMF, NVENC, or QSV. LGPL: no `--enable-gpl`, no `libx264`. This tree has no `libpostproc`.
+
+`--disable-everything` then enables only:
+
+- decoder / parser / bsf: `h264`, `h264_mp4toannexb`, `extract_extradata`
+- demuxers: `rtsp`, `rtp`, `sdp`, `h264` (RTSP also pulls `http` / `tcp` / `udp` / `rtp`)
+- hwaccels: `h264_d3d11va`, `h264_d3d11va2`, `h264_dxva2`
+- filters used by PhantomMedia’s player graph (`format`, `scale`, `hwdownload`, …). `buffer` / `buffersink` are always built into libavfilter.
+
+`avdevice.dll` is still produced (empty device list) so the current import list can load.
+
+From an MSYS2 shell already started from the x64 Native Tools prompt:
+
+```bash
+export PATH="/c/Program Files/LLVM/bin:$PATH"
+./1_build_msvc_rtsp_min.sh
+```
+
 ### Verify the tools are visible inside MSYS2
 
 ```bash
@@ -280,6 +308,20 @@ You should see `VFS..D png` (and `apng`). Then copy the install into Prism:
 ```cmd
 Dependencies\FFmpeg\sync_to_prism.bat "D:\Source Code\AvolitesLtd\FFmpeg\build\install"
 ```
+
+That is the **full** Prism payload (headers, import libs, every native decoder, H.264 encoders). Prism / Player WiX harvest `Build\...\Prism\Dist` and MalibuPlayer Dist after Premake `copy_ffmpeg_dlls()`.
+
+### Sync the RTSP / H.264-min runtime into Prism
+
+After `build_msvc_rtsp_min.bat`:
+
+```cmd
+Dependencies\FFmpeg\sync_to_prism_rtsp_min.bat "D:\Source Code\AvolitesLtd\FFmpeg\build\install-rtsp-min"
+```
+
+That copies only `av*.dll` / `sw*.dll` (and PDBs / LGPL notice) into `Dependencies\FFmpeg-rtsp-min\`. It does **not** replace `Dependencies\FFmpeg` headers or libs. SynergyPreviewsReceiver still *links* the full import libs, then Premake `copy_ffmpeg_rtsp_min_dlls()` puts the min DLLs next to the EXE and writes `COPYING.LGPLv2.1` plus `ffmpeg-rtsp-min-readme.txt` under `Legal\FFmpeg` (replacing the full-build GPL files). The Synergy NuGet packs that output folder, so Titan gets the min set without a WiX change. Re-run Premake after adding the helper.
+
+Do not robocopy the min install over `Dependencies\FFmpeg` — Prism and Player would then ship a decoder that cannot open PNG sequences or HEVC.
 
 ### Same decoder list as a gyan.dev `full_build` README
 
