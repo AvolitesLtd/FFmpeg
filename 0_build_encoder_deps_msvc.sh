@@ -1,5 +1,6 @@
 #!/bin/bash
-# MSVC H.264 encoder deps: libx264, AMF, NVENC (ffnvcodec), QSV (libvpl).
+# MSVC H.264 encoder deps: AMF, NVENC (ffnvcodec), QSV (libvpl).
+# No libx264 — that would require --enable-gpl and turn the FFmpeg DLLs GPL.
 # Installs to a path WITHOUT spaces so pkg-config flags survive FFmpeg configure.
 set -euo pipefail
 
@@ -61,31 +62,7 @@ rewrite_pc_prefix() {
 
 export MSYS2_ARG_CONV_EXCL='*'
 
-# ---------------------------------------------------------------------------
-# x264 (libx264 encoder)
-# ---------------------------------------------------------------------------
-if [[ -f "$PREFIX/lib/pkgconfig/x264.pc" && ( -f "$PREFIX/lib/x264.lib" || -f "$PREFIX/lib/libx264.lib" ) ]]; then
-  echo "==> x264 already installed"
-else
-  echo "==> building x264 (MSVC static)"
-  X264_SRC="$SRC_ROOT/x264"
-  fetch_github_tree "mirror/x264" "$X264_SRC"
-  pushd "$X264_SRC" >/dev/null
-  make distclean >/dev/null 2>&1 || true
-  CC=cl ./configure \
-    --enable-static \
-    --disable-cli \
-    --disable-opencl \
-    --prefix="$PREFIX_UNIX"
-  make -j"$(nproc 2>/dev/null || echo 8)"
-  make install
-  popd >/dev/null
-  # FFmpeg msvc maps -lx264 -> x264.lib
-  if [[ -f "$PREFIX/lib/libx264.lib" && ! -f "$PREFIX/lib/x264.lib" ]]; then
-    cp -f "$PREFIX/lib/libx264.lib" "$PREFIX/lib/x264.lib"
-  fi
-  rewrite_pc_prefix "$PREFIX/lib/pkgconfig/x264.pc"
-fi
+echo "==> skipping x264 (keeps FFmpeg LGPL; software H.264 uses h264_mf)"
 
 # ---------------------------------------------------------------------------
 # AMF headers (h264_amf / hevc_amf)
@@ -157,7 +134,6 @@ else
   fi
 fi
 
-rewrite_pc_prefix "$PREFIX/lib/pkgconfig/x264.pc"
 rewrite_pc_prefix "$PREFIX/lib/pkgconfig/ffnvcodec.pc"
 rewrite_pc_prefix "$PREFIX/lib/pkgconfig/vpl.pc"
 
